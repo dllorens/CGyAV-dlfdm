@@ -100,9 +100,9 @@ void LoadRudderInput(std::vector<glm::vec2>& control_inputs,
         constexpr float kInputDuration = 0.25f;     // [seg]
 
         // Doblete de timón de dirección
-        rudder_input = glm::vec2(begin_time,glm::radians(-10.0f));
+        rudder_input = glm::vec2(begin_time,glm::radians(-5.0f));
         control_inputs.push_back(rudder_input);
-        rudder_input = glm::vec2(begin_time + kInputDuration ,glm::radians(10.0f));
+        rudder_input = glm::vec2(begin_time + kInputDuration ,glm::radians(5.0f));
         control_inputs.push_back(rudder_input);
         rudder_input = glm::vec2(begin_time + 2 * kInputDuration, neutral_input);
         control_inputs.push_back(rudder_input);
@@ -117,8 +117,8 @@ int main()
 
     // -------------------------------------------------------------------------
     // Trim conditions
-    init_state.intertial_position = glm::vec3(0.0f,0.0f,5000.0f);     // [m]
-    init_state.boby_velocity = glm::vec3(150.0f,0.0f,-0.3667f);       // [m/s]
+    init_state.intertial_position = glm::vec3(0.0f,0.0f,-5000.0f);     // [m] - Sistema NED: North, East, Down
+    init_state.boby_velocity = glm::vec3(149.998f,0.0f,-0.36675f);     // [m/s]
     init_state.body_omega = glm::vec3(0.0f,0.0f,0.0f);
     init_state.theta = 0.0f;
     init_state.phi = 0.0f;
@@ -128,7 +128,7 @@ int main()
     controls.elevator = -0.09024f;  // [rad]
     controls.aileron = 0.0f;
     controls.rudder = 0.0f;
-    controls.throttle = 0.3119f;    // [%]
+    controls.throttle = 0.3202f;    // [%]
     // -------------------------------------------------------------------------
 
     std::cout << "DLFDM" << std::endl;

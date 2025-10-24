@@ -125,11 +125,13 @@ AerodynamicsModel::AeroDynamicForces AerodynamicsModel::calculate(const glm::vec
     const float cb = glm::cos(beta);
     const float sb = glm::sin(beta);
 
-    glm::mat3 bodyToWind( ca * cb,   sb,    sa * cb,
+    // Important! glm matrix are row mayor order as per opengl standard, but the
+    // body to wing transformation prsented in the book is given in column mayor
+    // order so it has to be written as a transponse in glm:
+    // ie. glm::mat3 bodyToWind = glm::transpose(windToBody);
+    glm::mat3 windToBody( ca * cb,   sb,    sa * cb,
                          -ca * sb,   cb,   -sa * sb,
                          -sa,        0.0f,  ca      );
-
-    glm::mat3 windToBody = glm::transpose(bodyToWind);
 
     body_forces_ = windToBody * wind_forces_;
 

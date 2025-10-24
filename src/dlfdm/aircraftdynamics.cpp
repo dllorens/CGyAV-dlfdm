@@ -55,13 +55,16 @@ AircraftDynamics::StateDerivatives AircraftDynamics::compute_derivatives(const A
     // Transform NED to Body axes
     // Aircraft simulation and control, 1st Ed. - Stevens & Lewis
     // Eq. (1.4-10) pag. 37 (pdf 59)
-    glm::mat3 ned_to_body(
+
+    // Important! glm matrix are row mayor order as per opengl standard, but the
+    // ned to body transformation presented in the book is given in column mayor
+    // order so it has to be written as a transponse in glm:
+    // ie. glm::mat3 ned_to_body = glm::transpose(body_to_ned);
+    glm::mat3 body_to_ned(
                 ct * cy,                    ct * sy,                   -st,
                 sp * st * cy - cp * sy,     sp * st * sy + cp * cy,    sp * ct,
                 cp * st * cy + sp * sy,     cp * st * sy - sp * cy,    cp * ct
                 );
-
-    glm::mat3 body_to_ned = glm::transpose(ned_to_body);
 
     // -------------------------------------------------------------------------
     // Flat earth aproximation
@@ -71,12 +74,6 @@ AircraftDynamics::StateDerivatives AircraftDynamics::compute_derivatives(const A
     // Aircraft simulation and control, 1st Ed. - Stevens & Lewis
     // Eq. 2.4-5 pag. 81 (pdf 103)
     state_derv_.ned_position_dot = body_to_ned * state.boby_velocity;
-
-// Codigo original
-//    totalForce.z += params.mass * kGravityAcc;
-//    state_derv_.velocityDot.x = (totalForce.x / params.mass) + q * w - r * v;
-//    state_derv_.velocityDot.y = (totalForce.y / params.mass) + r * u - p * w;
-//    state_derv_.velocityDot.z = (totalForce.z / params.mass) + p * v - q * u;
 
     // Velocity derivative (body frame)
     // Aircraft simulation and control, 1st Ed. - Stevens & Lewis
@@ -143,6 +140,7 @@ void AircraftDynamics::log_state_titles(std::ostream &os, const char &sep) const
     os << "u_dot [m/s2]" << sep << "v_dot [m/s2]" << sep << "w_dot [m/s2]";
     os << sep;
     os << "xdot_ned [m/s]" << sep << "ydot_ned [m/s]" << sep << "zdot_ned [m/s]";
+//    os << sep;
 //    os << "X_t [N]" << sep << "Y_t [N]" << sep << "Z_t [N]";
 //    os << "u [m/s]" << sep << "v [m/s]" << sep << "w [m/s]";
 //    os << sep;
@@ -153,6 +151,7 @@ void AircraftDynamics::log_state_derivatives(std::ostream& os, const char &sep) 
     os << state_derv_.body_omega_dot << sep;
     os << state_derv_.body_velocity_dot << sep;
     os << state_derv_.ned_position_dot;
+//    os << body_total_force_;
 //    os << state_derv_.positionDot << sep;
 }
 
