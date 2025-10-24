@@ -22,6 +22,10 @@ public:
     const AircraftState& getState() const { return aircraft_state_; }
     void setState(const AircraftState& newState) { aircraft_state_ = newState; }
 
+    const AircraftDynamics::StateDerivatives get_state_dot() const {
+        return state_deriv_;
+    }
+
     void setTimeStep(float dt) { time_step_ = dt; }
 
     float get_sim_time(void) const      { return time_; }
