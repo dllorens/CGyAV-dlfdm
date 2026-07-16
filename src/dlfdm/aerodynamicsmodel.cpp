@@ -172,7 +172,7 @@ void AerodynamicsModel::log_angles_titles(std::ostream &os, const char &sep) con
     os << "Alpha [rad]" << sep << "Beta [rad]";
 }
 
-void AerodynamicsModel::log_angles(std::ostream& os, const char &sep) const
+void AerodynamicsModel::log_angles(std::ostream& os, const char &) const
 {
     os << aero_angles_;
 }
@@ -194,7 +194,7 @@ void AerodynamicsModel::log_moments_titles(std::ostream &os, const char &sep) co
     os << "L [N·m]" << sep << "M [N·m]" << sep << "N [N·m]";
 }
 
-void AerodynamicsModel::log_moments(std::ostream& os, const char &sep) const
+void AerodynamicsModel::log_moments(std::ostream& os, const char &) const
 {
     os << body_moments_;
 }

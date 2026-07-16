@@ -2,11 +2,6 @@
 
 namespace dlfdm {
 
-static std::ostream& operator<<(std::ostream& os, const glm::vec2 v){
-    os << v.x << "," << v.y;
-    return os;
-}
-
 static std::ostream& operator<<(std::ostream& os, const glm::vec3 v){
     os << v.x << "," << v.y << "," << v.z;
     return os;
