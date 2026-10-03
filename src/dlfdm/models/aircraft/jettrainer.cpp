@@ -10,6 +10,7 @@ namespace jettrainer {
 /// \brief Trim condition: steady flight at 5000 [m] on the standard atmosphere
 ///  - ISA at h = 5000 [m] -> T = 255.65 [K], rho = 0.73611 [kg/m3]
 ///  - TAS = 150 [m/s], theta = 0 [deg], alpha = +0.581 [deg]
+///  - M = 0.468, thrust lapse F/F_SL = 0.4118
 /// \return Initial state and controls for the FDM as a TrimPoint struct
 ///
 static TrimPoint tc_ISA5000TAS150(void)
@@ -19,6 +20,11 @@ static TrimPoint tc_ISA5000TAS150(void)
     // force and moment equations in the symmetry plane (XZ) for the condition:
     // Altitude: 5000 [m], TAS = 150 [m/s], theta = 0 [deg] -> u = 149.992 m/s
     // & w = 1.521 m/s, rho taken from the ISA model at that altitude.
+    // The throttle accounts for the thrust lapse: at this altitude and Mach the
+    // engine delivers 0.4118 of its sea level thrust, so the throttle is the
+    // one that balanced the aircraft with constant thrust divided by that
+    // factor. Altitude and Mach are fixed here, so the lapse is a constant and
+    // the aerodynamic part of the trim (alpha, elevator) is untouched by it.
     // Verified over a 60 s run: altitude stays within +-20 m of 5000 m
     // (residual phugoid).
     // Do not change any of these values as it will break the equilibrium!
@@ -35,7 +41,7 @@ static TrimPoint tc_ISA5000TAS150(void)
     trim_point.controls.elevator   = -0.0937f;      // [rad]
     trim_point.controls.aileron    = 0.0f;
     trim_point.controls.rudder     = 0.0f;
-    trim_point.controls.throttle   = 0.20426f;      // [fraction]
+    trim_point.controls.throttle   = 0.49601f;      // [fraction]
 
     return trim_point;
 }
@@ -58,8 +64,15 @@ AircraftParameters load_model(void)
     p.wingChord = 1.64f;        // [m]
     p.wingSpan = 8.01f;         // [m]
 
-    // Propulsion
-    p.maxThrust = 11120.0f;     // [N]
+    // Propulsion. Pratt & Whitney Canada JT15D-4B, from Table 7-11, pag. 202,
+    // General Aviation Aircraft Design - Gudmundsson, S.: BPR 3.3 (so the high
+    // bypass formulation applies) and 2500 lbf = 11.12 kN of T-O thrust.
+    p.engine.type           = EngineType::kTurbofan;
+    p.engine.max_thrust_sl  = 11120.0f;     // [N]
+    p.engine.throttle_ratio = 1.072f;       // [-] TR used in Figure 7-11
+    p.engine.bypass_ratio   = 3.3f;         // [-]
+    p.engine.afterburner    = false;        // [-] not applicable to high bypass
+    p.engine_count          = 1;            // [-]
 
     // Aerodynamic coefficients
     p.CL0 = 0.15f;              // [-]

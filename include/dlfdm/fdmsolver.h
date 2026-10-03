@@ -9,6 +9,7 @@
 #include <dlfdm/defines.h>
 #include <dlfdm/aerodynamicsmodel.h>
 #include <dlfdm/aircraftdynamics.h>
+#include <dlfdm/propulsionmodel.h>
 #include <dlfdm/models/atmosphere/isa.h>
 
 namespace dlfdm {
@@ -46,17 +47,24 @@ public:
     ///
     AerodynamicsModel::AeroDynamicForces get_aero_fm(void) { return aero_fm_; }
 
+    ///
+    /// \brief get_thrust Total thrust force of all engines [N]
+    ///
+    float get_thrust(void) const { return propulsion.get_thrust(); }
+
 private:
     AircraftState aircraft_state_;
     AircraftParameters aircraft_data_;
     ISA<float> atmosphere_;
     AerodynamicsModel aerodynamics;
+    PropulsionModel propulsion;
     AircraftDynamics dynamics;
 
     float time_step_;
     float time_;
 
     AerodynamicsModel::AeroDynamicForces aero_fm_;
+    glm::vec3 body_thrust_;
     AircraftDynamics::StateDerivatives state_deriv_;
 
     void log_state_titles(std::ostream& os, const char& sep = ',') const;

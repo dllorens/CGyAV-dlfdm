@@ -23,7 +23,7 @@ AircraftDynamics::AircraftDynamics(const AircraftParameters& p) : aircraft_data_
 
 AircraftDynamics::StateDerivatives AircraftDynamics::compute_derivatives(const AircraftState &state,
                                                                         const AerodynamicsModel::AeroDynamicForces &aero,
-                                                                        const ControlInputs &controls)
+                                                                        const glm::vec3 &body_thrust)
 {
     // Body frame velocities
     float u = state.body_velocity.x;
@@ -75,11 +75,10 @@ AircraftDynamics::StateDerivatives AircraftDynamics::compute_derivatives(const A
     // Eq. (1.5-4) pag. 37 (pdf 59) y 2.4-2 pag. 81 (pdf 103)
     constexpr float kGravityAcc = 9.80665f;    // [m/s2]
 
-    // Add non aerodynamics forces and moments
-    float throttle = clamp(controls.throttle, 0.0f, 1.0f);
-    float thrust_force = aircraft_data_.maxThrust * throttle;
-
-    body_total_force_ = aero.body_forces + glm::vec3(thrust_force, 0.0f, 0.0f);
+    // Add non aerodynamics forces and moments. Thrust comes already resolved
+    // in body axes from PropulsionModel, which is the one that knows the
+    // atmosphere.
+    body_total_force_ = aero.body_forces + body_thrust;
 
     state_deriv_.body_velocity_dot.x = (body_total_force_.x / aircraft_data_.mass - kGravityAcc * st) - q * w + r * v;
     state_deriv_.body_velocity_dot.y = (body_total_force_.y / aircraft_data_.mass + kGravityAcc * sp * ct) - r * u + p * w;

@@ -66,4 +66,18 @@ plot "./build/Desktop_Qt_5_15_0_x64-Release/salida.csv" using 1:20 with lines ti
      "./build/Desktop_Qt_5_15_0_x64-Release/salida.csv" using 1:21 with lines title "M", \
      "./build/Desktop_Qt_5_15_0_x64-Release/salida.csv" using 1:22 with lines title "N"
 
+#pause -1 "Presiona Enter para continuar..."
+
+# GRÁFICO 7: propulsión
+set output "empuje.eps"
+set title "Propulsión"
+set yrange [0:12000]  # Ajusta min:max según tus datos
+set y2range [0:1]
+set y2tics
+plot "./build/Desktop_Qt_5_15_0_x64-Release/salida.csv" using 1:40 with lines title "empuje", \
+     "./build/Desktop_Qt_5_15_0_x64-Release/salida.csv" using 1:38 axes x1y2 with lines title "Mach", \
+     "./build/Desktop_Qt_5_15_0_x64-Release/salida.csv" using 1:39 axes x1y2 with lines title "F/F_SL"
+
+unset y2tics
+
 #pause -1 "Presiona Enter para salir..."

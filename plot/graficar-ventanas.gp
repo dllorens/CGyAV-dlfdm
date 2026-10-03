@@ -79,4 +79,21 @@ plot datafile using 1:20 with lines title "L", \
      datafile using 1:21 with lines title "M", \
      datafile using 1:22 with lines title "N"
 
+pause -1 "Presiona Enter para continuar..."
+
+# GRÁFICO 7: propulsión
+#set output "empuje.eps"
+set title "Propulsión"
+set ylabel "F [N]"
+set yrange [0:12000]  # Ajusta min:max según tus datos
+set y2label "M [-] / F/F_SL [-]"
+set y2range [0:1]
+set y2tics
+plot datafile using 1:40 with lines title "empuje", \
+     datafile using 1:38 axes x1y2 with lines title "Mach", \
+     datafile using 1:39 axes x1y2 with lines title "F/F_SL"
+
+unset y2tics
+unset y2label
+
 pause -1 "Presiona Enter para salir..."

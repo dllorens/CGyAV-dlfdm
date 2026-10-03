@@ -22,4 +22,5 @@ DLFDM_INC_DIRS = \
 # Agregar acá cada nueva subcarpeta de src/ con .cpp.
 DLFDM_LIB_DIRS = \
     $(DLFDM_DIR)/src/dlfdm \
-    $(DLFDM_DIR)/src/dlfdm/models/aircraft
+    $(DLFDM_DIR)/src/dlfdm/models/aircraft \
+    $(DLFDM_DIR)/src/dlfdm/models/propulsion

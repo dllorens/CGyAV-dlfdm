@@ -23,7 +23,7 @@ public:
 
     StateDerivatives compute_derivatives(const AircraftState& state,
                                          const AerodynamicsModel::AeroDynamicForces& aero,
-                                         const ControlInputs& controls);
+                                         const glm::vec3& body_thrust);
 
     void log_state_titles(std::ostream& os, const char& sep = ',') const;
     void log_state_derivatives(std::ostream& os, const char& sep = ',') const;

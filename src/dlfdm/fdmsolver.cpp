@@ -8,7 +8,8 @@ static std::ostream& operator<<(std::ostream& os, const glm::vec3 v){
 }
 
 FDMSolver::FDMSolver(const AircraftParameters& p, float dt)
-    : aircraft_data_(p), aerodynamics(p,&atmosphere_), dynamics(p), time_step_(dt), time_(0.0f)
+    : aircraft_data_(p), aerodynamics(p,&atmosphere_), propulsion(p,&atmosphere_),
+      dynamics(p), time_step_(dt), time_(0.0f), body_thrust_(0.0f)
 {
     // Initialize state
     aircraft_state_.inertial_position = glm::vec3(0.0f);
@@ -47,10 +48,12 @@ void FDMSolver::update(const ControlInputs &controls) {
                                       aircraft_state_.body_omega,
                                       clamped_controls);
 
-    // TODO: move thrust calculation here
+    // Calculate thrust force in body axes
+    body_thrust_ = propulsion.calculate(aircraft_state_.body_velocity,
+                                        clamped_controls);
 
     // Compute state derivatives
-    state_deriv_ = dynamics.compute_derivatives(aircraft_state_, aero_fm_, clamped_controls);
+    state_deriv_ = dynamics.compute_derivatives(aircraft_state_, aero_fm_, body_thrust_);
 
     // Euler integration
     time_ += time_step_;
@@ -93,6 +96,8 @@ void FDMSolver::log_titles(std::ostream &os, const char &sep) const
     dynamics.log_state_titles(os,sep);
     os << sep;
     log_atm_titles(os,sep);
+    os << sep;
+    propulsion.log_all_titles(os,sep);
     os << std::endl;
 }
 
@@ -105,6 +110,8 @@ void FDMSolver::log_state(std::ostream& os, const char& sep) const {
     dynamics.log_state_derivatives(os,sep);
     os << sep;
     log_atm_state(os,sep);
+    os << sep;
+    propulsion.log_all(os,sep);
     os << std::endl;
 }
 

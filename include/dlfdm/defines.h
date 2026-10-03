@@ -33,6 +33,38 @@ struct TrimPoint {
     ControlInputs  controls;
 };
 
+///
+/// \brief Engine types with a thrust model available in models/propulsion.
+///
+enum class EngineType {
+    kTurbojet = 0,
+    kTurbofan,
+};
+
+///
+/// \brief Engine data an aircraft declares. Each model reads only the fields
+/// it needs, so unused ones can be left at zero.
+///
+struct EngineParameters {
+    EngineType type;
+    float max_thrust_sl;    // [N] - F_SL, thrust at sea level, static
+    float throttle_ratio;   // [-] - TR, throttle ratio
+    float bypass_ratio;     // [-] - BPR, turbofan only: selects low/high bypass
+    bool  afterburner;      // [-] - maximum (true) or military (false) rating
+};
+
+///
+/// \brief Flight condition handed to the engine models. Built once per step by
+/// PropulsionModel, so every engine shares the same ram ratios.
+///
+struct FlightCondition {
+    float tas;          // [m/s] - true airspeed
+    float mach;         // [-]
+    float theta_0;      // [-] - total/SL temperature ratio, Gudmundsson Eq. (7-21)
+    float delta_0;      // [-] - total/SL pressure ratio, Gudmundsson Eq. (7-22)
+    float density;      // [kg/m3] - for propeller models
+};
+
 struct AircraftParameters {
     // Mass properties
     float mass;             // [kg]
@@ -45,7 +77,8 @@ struct AircraftParameters {
     float wingSpan;
 
     // Propulsion
-    float maxThrust;       // Maximum thrust at sea level
+    EngineParameters engine;    // Engine type and its coefficients
+    int engine_count;           // [-] Number of identical engines installed
 
     // Aerodynamic coefficients (linear model)
     float CL0, CLa, CL_delta_e;         // Lift: CL = CL0 + CLa*alpha + CL_delta_e*delta_e
