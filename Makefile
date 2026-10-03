@@ -12,6 +12,9 @@ SRC_DIR  = ./test                   # acá vive main.cpp (entry point)
 
 PROJECT_NAME = dlfdm-test
 MAIN_CXX     = main
+# HUD Test
+#PROJECT_NAME = dlfdm-hud-test
+#MAIN_CXX     = hud-data-example
 
 PROJECT_LDLIBS = -lpthread          # el FDM no necesita nada de GUI
 

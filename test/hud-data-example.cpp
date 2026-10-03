@@ -53,13 +53,13 @@ inline dlfdm::AircraftParameters LoadJetTrainerModel() {
     p.Cn_delta_r = -0.12f;      // [1/rad]
 
     // Min-max surface deflections
-    p.min_elevator = glm::radians(-15.0f);  // [rad]
-    p.max_elevator = glm::radians(20.0f);   // [rad]
+    p.min_elevator = glm::radians(-25.0f);  // [rad]
+    p.max_elevator = glm::radians(15.0f);   // [rad]
 
     p.min_aileron = glm::radians(-20.0f);   // [rad]
     p.max_aileron = glm::radians(20.0f);    // [rad]
 
-    p.max_rudder = glm::radians(20.0f);     // [rad]
+    p.max_rudder = glm::radians(30.0f);     // [rad]
 
     return p;
 }
@@ -110,8 +110,7 @@ void LoadRudderInput(std::vector<glm::vec2>& control_inputs,
         control_inputs.push_back(rudder_input);
 }
 
-hud::FlightData ComputeHUDData(const dlfdm::AircraftState& init_state,
-                               const dlfdm::AircraftState& state,
+hud::FlightData ComputeHUDData(const dlfdm::AircraftState& state,
                                const dlfdm::AircraftDynamics::StateDerivatives& state_dot)
 {
     hud::FlightData hud_data;
@@ -126,8 +125,8 @@ hud::FlightData ComputeHUDData(const dlfdm::AircraftState& init_state,
     hud_data.roll       = state.phi * kToDeg;
     hud_data.heading    = state.psi * kToDeg;
 
-    const float alt_offset = (-2.0f * init_state.intertial_position.z);
-    hud_data.altitude   = (alt_offset + state.intertial_position.z) * kToFt;
+    // Z coordinate in NED points down, so a sign change is needed: s-z.
+    hud_data.altitude   = (-1.0f * state.intertial_position.z) * kToFt;
 
     const float Vt = glm::length(state.boby_velocity);
     hud_data.speed      = Vt * kToKT;
@@ -169,17 +168,17 @@ int main()
     // -------------------------------------------------------------------------
     // Trim conditions
     init_state.intertial_position = glm::vec3(0.0f,0.0f,-5000.0f);     // [m] - Sistema NED: North, East, Down
-    init_state.boby_velocity = glm::vec3(149.998f,0.0f,-0.36675f);     // [m/s]
+    init_state.boby_velocity = glm::vec3(149.992f,0.0f,1.521f);     // [m/s]
     init_state.body_omega = glm::vec3(0.0f,0.0f,0.0f);
     init_state.theta = 0.0f;
     init_state.phi = 0.0f;
     init_state.psi = 0.0f;
 
     dlfdm::ControlInputs controls;
-    controls.elevator = -0.09024f;  // [rad]
+    controls.elevator = -0.0937f;  // [rad]
     controls.aileron = 0.0f;
     controls.rudder = 0.0f;
-    controls.throttle = 0.3202f;    // [%]
+    controls.throttle = 0.20426f;    // [%]
     // -------------------------------------------------------------------------
 
     std::cout << "DLFDM" << std::endl;
@@ -284,8 +283,7 @@ int main()
 
         fdm.update(controls);
 
-        hud_data = ComputeHUDData(init_state,
-                                  fdm.getState(),
+        hud_data = ComputeHUDData(fdm.getState(),
                                   fdm.get_state_dot());
 
         // Do data logging

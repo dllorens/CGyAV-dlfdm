@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+#include <dlfdm/models/atmosphere/atmosphere.h>
 #include <dlfdm/tools.h>
 
 namespace dlfdm {
@@ -16,8 +17,9 @@ static std::ostream& operator<<(std::ostream& os, const glm::vec3 v){
     return os;
 }
 
-AerodynamicsModel::AerodynamicsModel(const AircraftParameters& p)
-    : aircraft_data_(p)
+AerodynamicsModel::AerodynamicsModel(const AircraftParameters& p,
+                                     Atmosphere<float> *atm)
+    : aircraft_data_(p), atmosphere_(atm)
 {
     wind_forces_    = glm::vec3(0.0f);
     aero_moments_   = glm::vec3(0.0f);
@@ -60,6 +62,8 @@ AerodynamicsModel::AeroDynamicForces AerodynamicsModel::calculate(const glm::vec
     float alpha, beta;
     calculate_angles(body_velocity, alpha, beta);
     aero_angles_ = glm::vec2(alpha,beta);
+
+    float rho = atmosphere_->get_density();
 
     // Dynamic pressure
     float qbar = 0.5f * rho * V * V;

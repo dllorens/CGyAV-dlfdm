@@ -9,6 +9,7 @@
 #include <dlfdm/defines.h>
 #include <dlfdm/aerodynamicsmodel.h>
 #include <dlfdm/aircraftdynamics.h>
+#include <dlfdm/models/atmosphere/isa.h>
 
 namespace dlfdm {
 
@@ -20,7 +21,11 @@ public:
     void update(const ControlInputs& controls);
 
     const AircraftState& getState() const { return aircraft_state_; }
-    void setState(const AircraftState& newState) { aircraft_state_ = newState; }
+    void setState(const AircraftState& newState) {
+        aircraft_state_ = newState;
+        // Update atmosphere to new aircraft state
+        atmosphere_.update(-1.0f * aircraft_state_.intertial_position.z);
+    }
 
     const AircraftDynamics::StateDerivatives get_state_dot() const {
         return state_deriv_;
@@ -44,6 +49,7 @@ public:
 private:
     AircraftState aircraft_state_;
     AircraftParameters aircraft_data_;
+    ISA<float> atmosphere_;
     AerodynamicsModel aerodynamics;
     AircraftDynamics dynamics;
 
@@ -55,6 +61,9 @@ private:
 
     void log_state_titles(std::ostream& os, const char& sep = ',') const;
     void log_aircraft_state(std::ostream& os, const char& sep = ',') const;
+
+    void log_atm_titles(std::ostream& os, const char& sep = ',') const;
+    void log_atm_state(std::ostream& os, const char& sep = ',') const;
 };
 
 }   // End namespace dlfdm

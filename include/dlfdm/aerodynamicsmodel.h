@@ -9,6 +9,9 @@
 
 namespace dlfdm {
 
+template<class T>
+class Atmosphere;
+
 class AerodynamicsModel
 {
 public:
@@ -17,7 +20,7 @@ public:
         glm::vec3 body_moments;      /// [N·m] - Body frame - [x=L, y=M, z=N]
     };
 
-    AerodynamicsModel(const AircraftParameters& p);
+    AerodynamicsModel(const AircraftParameters& p, Atmosphere<float> *atm);
 
     // Calculate angle of attack and sideslip from velocity
     void calculate_angles(const glm::vec3& vel, float& alpha, float& beta) const;
@@ -39,7 +42,7 @@ public:
 
 private:
     const AircraftParameters& aircraft_data_;
-    const float rho = 1.225f;  // Air density sea level [kg/m^3]
+    Atmosphere<float>* atmosphere_;
 
     glm::vec3 wind_forces_;         // Forces in wind axis
     glm::vec3 aero_moments_;

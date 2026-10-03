@@ -17,7 +17,7 @@ set grid
 set title "Altitud"
 set ylabel "h [m]"
 set yrange [0:6000]  # Ajusta min:max según tus datos
-plot datafile using 1:(10000.0+$4) with lines title "h"
+plot datafile using 1:(-1.0*$4) with lines title "h"
 
 pause -1 "Presiona Enter para continuar..."
 

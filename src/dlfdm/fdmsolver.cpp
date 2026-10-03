@@ -8,7 +8,7 @@ static std::ostream& operator<<(std::ostream& os, const glm::vec3 v){
 }
 
 FDMSolver::FDMSolver(const AircraftParameters& p, float dt)
-    : aircraft_data_(p), aerodynamics(p), dynamics(p), time_step_(dt), time_(0.0f)
+    : aircraft_data_(p), aerodynamics(p,&atmosphere_), dynamics(p), time_step_(dt), time_(0.0f)
 {
     // Initialize state
     aircraft_state_.intertial_position = glm::vec3(0.0f);
@@ -17,6 +17,9 @@ FDMSolver::FDMSolver(const AircraftParameters& p, float dt)
     aircraft_state_.theta = 0.0f;
     aircraft_state_.psi = 0.0f;
     aircraft_state_.body_omega = glm::vec3(0.0f);
+
+    // Update atmosphere
+    atmosphere_.update(-1.0f * aircraft_state_.intertial_position.z);
 }
 
 void FDMSolver::update(const ControlInputs &controls) {
@@ -35,6 +38,9 @@ void FDMSolver::update(const ControlInputs &controls) {
     clamped_controls.rudder     = glm::clamp(clamped_controls.rudder,
                                              -aircraft_data_.max_rudder,
                                              aircraft_data_.max_rudder);
+
+    // Update atmosphere
+    atmosphere_.update(-1.0f * aircraft_state_.intertial_position.z);
 
     // Calculate aerodynamic forces and moments
     aero_fm_ = aerodynamics.calculate(aircraft_state_.boby_velocity,
@@ -85,6 +91,8 @@ void FDMSolver::log_titles(std::ostream &os, const char &sep) const
     aerodynamics.log_all_titles(os,sep);
     os << sep;
     dynamics.log_state_titles(os,sep);
+    os << sep;
+    log_atm_titles(os,sep);
     os << std::endl;
 }
 
@@ -95,6 +103,8 @@ void FDMSolver::log_state(std::ostream& os, const char& sep) const {
     aerodynamics.log_all(os,sep);
     os << sep;
     dynamics.log_state_derivatives(os,sep);
+    os << sep;
+    log_atm_state(os,sep);
     os << std::endl;
 }
 
@@ -112,6 +122,19 @@ void FDMSolver::log_aircraft_state(std::ostream &os, const char &sep) const
     os << aircraft_state_.phi << sep << aircraft_state_.theta << sep << aircraft_state_.psi << sep;
     os << aircraft_state_.boby_velocity << sep;
     os << aircraft_state_.body_omega;
+}
+
+void FDMSolver::log_atm_titles(std::ostream &os, const char &sep) const
+{
+    os << "alt [m]" << sep << "T [K]" << sep << "P [Pa]" << sep << "rho [kg/m3]";
+}
+
+void FDMSolver::log_atm_state(std::ostream &os, const char &sep) const
+{
+    os << atmosphere_.get_altitude() << sep;
+    os << atmosphere_.get_temperature() << sep;
+    os << atmosphere_.get_pressure() << sep;
+    os << atmosphere_.get_density();
 }
 
 } // namespace dlfdm
