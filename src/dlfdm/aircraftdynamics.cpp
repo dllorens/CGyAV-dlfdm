@@ -13,10 +13,10 @@ static std::ostream& operator<<(std::ostream& os, const glm::vec3 v){
 
 AircraftDynamics::AircraftDynamics(const AircraftParameters& p) : aircraft_data_(p)
 {
-    state_derv_.euler_dot           = glm::vec3(0.0f,0.0f,0.0f);
-    state_derv_.ned_position_dot    = glm::vec3(0.0f,0.0f,0.0f);
-    state_derv_.body_velocity_dot   = glm::vec3(0.0f,0.0f,0.0f);
-    state_derv_.body_omega_dot      = glm::vec3(0.0f,0.0f,0.0f);
+    state_deriv_.euler_dot           = glm::vec3(0.0f,0.0f,0.0f);
+    state_deriv_.ned_position_dot    = glm::vec3(0.0f,0.0f,0.0f);
+    state_deriv_.body_velocity_dot   = glm::vec3(0.0f,0.0f,0.0f);
+    state_deriv_.body_omega_dot      = glm::vec3(0.0f,0.0f,0.0f);
 
     body_total_force_ = glm::vec3(0.0f,0.0f,0.0f);
 }
@@ -25,10 +25,10 @@ AircraftDynamics::StateDerivatives AircraftDynamics::compute_derivatives(const A
                                                                         const AerodynamicsModel::AeroDynamicForces &aero,
                                                                         const ControlInputs &controls)
 {
-    // Boby frame velocities
-    float u = state.boby_velocity.x;
-    float v = state.boby_velocity.y;
-    float w = state.boby_velocity.z;
+    // Body frame velocities
+    float u = state.body_velocity.x;
+    float v = state.body_velocity.y;
+    float w = state.body_velocity.z;
     float p = state.body_omega.x;
     float q = state.body_omega.y;
     float r = state.body_omega.z;
@@ -51,9 +51,9 @@ AircraftDynamics::StateDerivatives AircraftDynamics::compute_derivatives(const A
     // Aircraft simulation and control, 1st Ed. - Stevens & Lewis
     // Eq. (1.4-10) pag. 37 (pdf 59)
 
-    // Important! glm matrix are row mayor order as per opengl standard, but the
-    // ned to body transformation presented in the book is given in column mayor
-    // order so it has to be written as a transponse in glm:
+    // Important! glm matrix are row major order as per opengl standard, but the
+    // ned to body transformation presented in the book is given in column major
+    // order so it has to be written as a transpose in glm:
     // ie. glm::mat3 ned_to_body = glm::transpose(body_to_ned);
     glm::mat3 body_to_ned(
                 ct * cy,                    ct * sy,                   -st,
@@ -62,13 +62,13 @@ AircraftDynamics::StateDerivatives AircraftDynamics::compute_derivatives(const A
                 );
 
     // -------------------------------------------------------------------------
-    // Flat earth aproximation
+    // Flat earth approximation
     // -------------------------------------------------------------------------
 
     // Navigation equations
     // Aircraft simulation and control, 1st Ed. - Stevens & Lewis
     // Eq. 2.4-5 pag. 81 (pdf 103)
-    state_derv_.ned_position_dot = body_to_ned * state.boby_velocity;
+    state_deriv_.ned_position_dot = body_to_ned * state.body_velocity;
 
     // Velocity derivative (body frame)
     // Aircraft simulation and control, 1st Ed. - Stevens & Lewis
@@ -81,16 +81,16 @@ AircraftDynamics::StateDerivatives AircraftDynamics::compute_derivatives(const A
 
     body_total_force_ = aero.body_forces + glm::vec3(thrust_force, 0.0f, 0.0f);
 
-    state_derv_.body_velocity_dot.x = (body_total_force_.x / aircraft_data_.mass - kGravityAcc * st) - q * w + r * v;
-    state_derv_.body_velocity_dot.y = (body_total_force_.y / aircraft_data_.mass + kGravityAcc * sp * ct) - r * u + p * w;
-    state_derv_.body_velocity_dot.z = (body_total_force_.z / aircraft_data_.mass + kGravityAcc * cp * ct) - p * v + q * u;
+    state_deriv_.body_velocity_dot.x = (body_total_force_.x / aircraft_data_.mass - kGravityAcc * st) - q * w + r * v;
+    state_deriv_.body_velocity_dot.y = (body_total_force_.y / aircraft_data_.mass + kGravityAcc * sp * ct) - r * u + p * w;
+    state_deriv_.body_velocity_dot.z = (body_total_force_.z / aircraft_data_.mass + kGravityAcc * cp * ct) - p * v + q * u;
 
     // Attitude rate (Euler angles)
     // Aircraft simulation and control, 1st Ed. - Stevens & Lewis
     // Eq. 2.4-3 pag. 81 (pdf 103)
-    state_derv_.euler_dot.x = p + (q * sp + r * cp) * tt;
-    state_derv_.euler_dot.y = q * cp - r * sp;
-    state_derv_.euler_dot.z = (q * sp + r * cp) / ct;
+    state_deriv_.euler_dot.x = p + (q * sp + r * cp) * tt;
+    state_deriv_.euler_dot.y = q * cp - r * sp;
+    state_deriv_.euler_dot.z = (q * sp + r * cp) / ct;
 
     // Angular acceleration (body frame)
     // Aircraft simulation and control, 1st Ed. - Stevens & Lewis
@@ -111,21 +111,21 @@ AircraftDynamics::StateDerivatives AircraftDynamics::compute_derivatives(const A
     const float c9 = Ixx / gamma;
 
     // p dot
-    state_derv_.body_omega_dot.x = (c1 * r + c2 * p) * q
+    state_deriv_.body_omega_dot.x = (c1 * r + c2 * p) * q
             + c3 * aero.body_moments.x
             + c4 * aero.body_moments.z;
 
     // q dot
-    state_derv_.body_omega_dot.y = c5 * p * r
+    state_deriv_.body_omega_dot.y = c5 * p * r
             - c6 * (p * p - r * r)
             + aero.body_moments.y / Iyy;
 
     // r dot
-    state_derv_.body_omega_dot.z = (c8 * p - c2 * r) * q
+    state_deriv_.body_omega_dot.z = (c8 * p - c2 * r) * q
             + c4 * aero.body_moments.x
             + c9 * aero.body_moments.z;
 
-    return state_derv_;
+    return state_deriv_;
 }
 
 void AircraftDynamics::log_state_titles(std::ostream &os, const char &sep) const
@@ -143,11 +143,11 @@ void AircraftDynamics::log_state_titles(std::ostream &os, const char &sep) const
 
 void AircraftDynamics::log_state_derivatives(std::ostream& os, const char &sep) const
 {
-    os << state_derv_.body_omega_dot << sep;
-    os << state_derv_.body_velocity_dot << sep;
-    os << state_derv_.ned_position_dot;
+    os << state_deriv_.body_omega_dot << sep;
+    os << state_deriv_.body_velocity_dot << sep;
+    os << state_deriv_.ned_position_dot;
 //    os << body_total_force_;
-//    os << state_derv_.positionDot << sep;
+//    os << state_deriv_.positionDot << sep;
 }
 
 } // namespace dlfdm

@@ -116,7 +116,7 @@ AerodynamicsModel::AeroDynamicForces AerodynamicsModel::calculate(const glm::vec
     float L = qbar * aircraft_data_.wingArea * CL;
 
     // The negative sign corresponds to the wind axes definition
-    // x_w -> fordward, y_w -> right , z_w -> down
+    // x_w -> forward, y_w -> right , z_w -> down
     wind_forces_.x = -D;
     wind_forces_.y = Y;
     wind_forces_.z = -L;
@@ -129,9 +129,9 @@ AerodynamicsModel::AeroDynamicForces AerodynamicsModel::calculate(const glm::vec
     const float cb = glm::cos(beta);
     const float sb = glm::sin(beta);
 
-    // Important! glm matrix are row mayor order as per opengl standard, but the
-    // body to wing transformation prsented in the book is given in column mayor
-    // order so it has to be written as a transponse in glm:
+    // Important! glm matrix are row major order as per opengl standard, but the
+    // body to wing transformation presented in the book is given in column major
+    // order so it has to be written as a transpose in glm:
     // ie. glm::mat3 bodyToWind = glm::transpose(windToBody);
     glm::mat3 windToBody( ca * cb,   sb,    sa * cb,
                          -ca * sb,   cb,   -sa * sb,

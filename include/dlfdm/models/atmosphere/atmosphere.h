@@ -21,7 +21,7 @@ public:
     inline T get_sound_speed(void) const    { return snd_spd_; }
 
 protected:
-    T altitude_;        /// [m] current altitude used to calcute atm params
+    T altitude_;        /// [m] current altitude used to calculate atm params
     T temperature_;     /// [K] temperature @ altitude_
     T pressure_;        /// [Pa] atm pressure @ altitude_
     T density_;         /// [kg/m3] atm density @ altitude_

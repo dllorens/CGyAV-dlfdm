@@ -31,7 +31,7 @@ public:
 private:
     const AircraftParameters& aircraft_data_;
 
-    StateDerivatives state_derv_;
+    StateDerivatives state_deriv_;
     glm::vec3 body_total_force_;
 };
 

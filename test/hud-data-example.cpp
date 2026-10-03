@@ -126,9 +126,9 @@ hud::FlightData ComputeHUDData(const dlfdm::AircraftState& state,
     hud_data.heading    = state.psi * kToDeg;
 
     // Z coordinate in NED points down, so a sign change is needed: s-z.
-    hud_data.altitude   = (-1.0f * state.intertial_position.z) * kToFt;
+    hud_data.altitude   = (-1.0f * state.inertial_position.z) * kToFt;
 
-    const float Vt = glm::length(state.boby_velocity);
+    const float Vt = glm::length(state.body_velocity);
     hud_data.speed      = Vt * kToKT;
 
     hud_data.vertical_speed = state_dot.ned_position_dot.z * kToFPM;
@@ -158,17 +158,17 @@ void log_hud_data(std::ostream& os, const hud::FlightData& data){
 
 int main()
 {
-    dlfdm::AircraftParameters airmacci_s211 = LoadJetTrainerModel();
+    dlfdm::AircraftParameters aermacchi_s211 = LoadJetTrainerModel();
 
-    dlfdm::FDMSolver fdm(airmacci_s211);
+    dlfdm::FDMSolver fdm(aermacchi_s211);
     dlfdm::AircraftState init_state;        // Initial conditions for integration
 
     hud::FlightData hud_data;
 
     // -------------------------------------------------------------------------
     // Trim conditions
-    init_state.intertial_position = glm::vec3(0.0f,0.0f,-5000.0f);     // [m] - Sistema NED: North, East, Down
-    init_state.boby_velocity = glm::vec3(149.992f,0.0f,1.521f);     // [m/s]
+    init_state.inertial_position = glm::vec3(0.0f,0.0f,-5000.0f);     // [m] - Sistema NED: North, East, Down
+    init_state.body_velocity = glm::vec3(149.992f,0.0f,1.521f);     // [m/s]
     init_state.body_omega = glm::vec3(0.0f,0.0f,0.0f);
     init_state.theta = 0.0f;
     init_state.phi = 0.0f;
@@ -185,7 +185,7 @@ int main()
     std::cout << "----------------------" << std::endl;
 
     // Load a control input for testing the fdm
-    typedef enum ControlsId {kNone = 0, kThrothle, kElevator, kAileron, kRudder } ControlsId;
+    typedef enum ControlsId {kNone = 0, kThrottle, kElevator, kAileron, kRudder } ControlsId;
 
     std::vector<glm::vec2> control_inputs;
     control_inputs.clear();
@@ -195,7 +195,7 @@ int main()
     switch (use_control_input) {
     case kNone:
         break;
-    case kThrothle:
+    case kThrottle:
         break;
     case kElevator:
         LoadPhugoidInput(control_inputs,2.5f,controls.elevator);
@@ -249,7 +249,7 @@ int main()
     log_hud_data_titles(hud_logging_file);
 
     std::cout << " Sim time: " << sim_time << " seg" << std::endl;
-    std::cout << " Beggining fdm execution ..." << std::endl;
+    std::cout << " Beginning fdm execution ..." << std::endl;
 
     // Main FDM update
     for (unsigned long i = 0 ; i < steps ; i++) {
@@ -260,7 +260,7 @@ int main()
                 switch (use_control_input) {
                 case kNone:
                     break;
-                case kThrothle:
+                case kThrottle:
                     controls.throttle = control_input.y;
                     break;
                 case kElevator:

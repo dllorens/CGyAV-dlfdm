@@ -11,15 +11,15 @@ FDMSolver::FDMSolver(const AircraftParameters& p, float dt)
     : aircraft_data_(p), aerodynamics(p,&atmosphere_), dynamics(p), time_step_(dt), time_(0.0f)
 {
     // Initialize state
-    aircraft_state_.intertial_position = glm::vec3(0.0f);
-    aircraft_state_.boby_velocity = glm::vec3(10.0f, 0.0f, 0.0f);  // Initial forward velocity
+    aircraft_state_.inertial_position = glm::vec3(0.0f);
+    aircraft_state_.body_velocity = glm::vec3(10.0f, 0.0f, 0.0f);  // Initial forward velocity
     aircraft_state_.phi = 0.0f;
     aircraft_state_.theta = 0.0f;
     aircraft_state_.psi = 0.0f;
     aircraft_state_.body_omega = glm::vec3(0.0f);
 
     // Update atmosphere
-    atmosphere_.update(-1.0f * aircraft_state_.intertial_position.z);
+    atmosphere_.update(-1.0f * aircraft_state_.inertial_position.z);
 }
 
 void FDMSolver::update(const ControlInputs &controls) {
@@ -40,10 +40,10 @@ void FDMSolver::update(const ControlInputs &controls) {
                                              aircraft_data_.max_rudder);
 
     // Update atmosphere
-    atmosphere_.update(-1.0f * aircraft_state_.intertial_position.z);
+    atmosphere_.update(-1.0f * aircraft_state_.inertial_position.z);
 
     // Calculate aerodynamic forces and moments
-    aero_fm_ = aerodynamics.calculate(aircraft_state_.boby_velocity,
+    aero_fm_ = aerodynamics.calculate(aircraft_state_.body_velocity,
                                       aircraft_state_.body_omega,
                                       clamped_controls);
 
@@ -56,10 +56,10 @@ void FDMSolver::update(const ControlInputs &controls) {
     time_ += time_step_;
 
     // Positions in inertial frame
-    aircraft_state_.intertial_position += state_deriv_.ned_position_dot * time_step_;
+    aircraft_state_.inertial_position += state_deriv_.ned_position_dot * time_step_;
 
     // Velocities in body frame
-    aircraft_state_.boby_velocity += state_deriv_.body_velocity_dot * time_step_;
+    aircraft_state_.body_velocity += state_deriv_.body_velocity_dot * time_step_;
     aircraft_state_.body_omega    += state_deriv_.body_omega_dot * time_step_;
 
     // Attitude in body frame
@@ -76,7 +76,7 @@ void FDMSolver::update(const ControlInputs &controls) {
 }
 
 glm::mat4 FDMSolver::getModelMatrix() const {
-    glm::mat4 model = glm::translate(glm::mat4(1.0f), aircraft_state_.intertial_position);
+    glm::mat4 model = glm::translate(glm::mat4(1.0f), aircraft_state_.inertial_position);
     model = glm::rotate(model, aircraft_state_.psi, glm::vec3(0.0f, 1.0f, 0.0f));
     model = glm::rotate(model, aircraft_state_.theta, glm::vec3(0.0f, 0.0f, 1.0f));
     model = glm::rotate(model, aircraft_state_.phi, glm::vec3(1.0f, 0.0f, 0.0f));
@@ -118,9 +118,9 @@ void FDMSolver::log_state_titles(std::ostream &os, const char &sep) const
 
 void FDMSolver::log_aircraft_state(std::ostream &os, const char &sep) const
 {
-    os << aircraft_state_.intertial_position << sep;
+    os << aircraft_state_.inertial_position << sep;
     os << aircraft_state_.phi << sep << aircraft_state_.theta << sep << aircraft_state_.psi << sep;
-    os << aircraft_state_.boby_velocity << sep;
+    os << aircraft_state_.body_velocity << sep;
     os << aircraft_state_.body_omega;
 }
 

@@ -14,8 +14,8 @@ struct ControlInputs {
 };
 
 struct AircraftState {
-    glm::vec3 intertial_position;       // [m] - [x=north, y=east, z=down] Position (Inertial frame)
-    glm::vec3 boby_velocity;            // [m/s] - [x=u, y=v, z=w] Velocity (Body frame)
+    glm::vec3 inertial_position;       // [m] - [x=north, y=east, z=down] Position (Inertial frame)
+    glm::vec3 body_velocity;            // [m/s] - [x=u, y=v, z=w] Velocity (Body frame)
     glm::vec3 body_omega;               // [rad/s] - [x=p, y=q, z=r] Angular velocity (Body frame)
 
     // Attitude (Euler angles)

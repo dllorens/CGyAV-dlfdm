@@ -24,7 +24,7 @@ public:
     void setState(const AircraftState& newState) {
         aircraft_state_ = newState;
         // Update atmosphere to new aircraft state
-        atmosphere_.update(-1.0f * aircraft_state_.intertial_position.z);
+        atmosphere_.update(-1.0f * aircraft_state_.inertial_position.z);
     }
 
     const AircraftDynamics::StateDerivatives get_state_dot() const {

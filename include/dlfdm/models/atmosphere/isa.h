@@ -98,13 +98,13 @@ void ISA<T>::update(const T &altitude)
         return;
     }
 
-    // Test continuos altitude change fisrt: check neightboards. Then do a linear
+    // Test continuous altitude change first: check neighbors. Then do a linear
     // search
     {
     bool interval_found = false;
 
     if( !in_altitude_interval(altitude,current_level_) ){
-        // Upper neightbord
+        // Upper neighbor
         if( (current_level_ + 1) <= (kLevelCount - 1) ){
             if( in_altitude_interval(altitude,current_level_ + 1) ){
                 ++current_level_;
@@ -112,7 +112,7 @@ void ISA<T>::update(const T &altitude)
             }
         }
 
-        // Lower neightbord
+        // Lower neighbor
         if( current_level_ > 0 && !interval_found ) {
             if( in_altitude_interval(altitude,current_level_ - 1) ){
                 --current_level_;
