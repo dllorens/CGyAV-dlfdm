@@ -7,62 +7,9 @@
 #include <dlfdm/defines.h>
 #include <dlfdm/fdmsolver.h>
 #include <dlfdm/aerodynamicsmodel.h>
+#include <dlfdm/models/aircraft/jettrainer.h>
 
 #include <hud/huddef.h>
-
-inline dlfdm::AircraftParameters LoadJetTrainerModel() {
-    dlfdm::AircraftParameters p;
-
-    // Mass properties
-    p.mass = 1815.0f;           // [kg]
-    p.Ixx = 1084.6f;            // [kg·m^2]
-    p.Iyy = 6507.9f;            // [kg·m^2]
-    p.Izz = 7050.2f;            // [kg·m^2]
-    p.Ixz = 271.16f;            // [kg·m^2]
-
-    // Aerodynamic reference
-    p.wingArea = 12.63f;        // [m^2]
-    p.wingChord = 1.64f;        // [m]
-    p.wingSpan = 8.01f;         // [m]
-
-    // Propulsion
-    p.maxThrust = 11120.0f;     // [N]
-
-    // Aerodynamic coefficients
-    p.CL0 = 0.15f;              // [-]
-    p.CLa = 5.5f;               // [1/rad]
-    p.CL_delta_e = 0.38f;       // [1/rad]
-    p.CD0 = 0.0205f;            // [-]
-    p.CDa = 0.12f;              // [1/rad]
-    p.Cm0 = -0.08f;             // [-]
-    p.Cma = -0.24f;             // [1/rad]
-    p.Cm_q = -15.7f;            // [1/rad]
-    p.CY_beta = -1.0f;          // [1/rad]
-    p.CY_r = 0.61f;             // [1/rad]
-    p.CY_delta_r = 0.028f;      // [1/rad]
-    p.Cl_beta = -0.11f;         // [1/rad]
-    p.Cl_p = -0.39f;            // [1/rad]
-    p.Cl_r = 0.28f;             // [1/rad]
-    p.Cn_beta = 0.17f;          // [1/rad]
-    p.Cn_p = 0.09f;             // [1/rad]
-    p.Cn_r = -0.26f;            // [1/rad]
-
-    // Control effectiveness
-    p.Cm_delta_e = -0.88f;      // [1/rad]
-    p.Cl_delta_a = 0.10f;       // [1/rad]
-    p.Cn_delta_r = -0.12f;      // [1/rad]
-
-    // Min-max surface deflections
-    p.min_elevator = glm::radians(-25.0f);  // [rad]
-    p.max_elevator = glm::radians(15.0f);   // [rad]
-
-    p.min_aileron = glm::radians(-20.0f);   // [rad]
-    p.max_aileron = glm::radians(20.0f);    // [rad]
-
-    p.max_rudder = glm::radians(30.0f);     // [rad]
-
-    return p;
-}
 
 void LoadPhugoidInput(std::vector<glm::vec2>& control_inputs,
                       const float& begin_time,
@@ -158,28 +105,19 @@ void log_hud_data(std::ostream& os, const hud::FlightData& data){
 
 int main()
 {
-    dlfdm::AircraftParameters aermacchi_s211 = LoadJetTrainerModel();
+    dlfdm::AircraftParameters aermacchi_s211 = dlfdm::jettrainer::load_model();
 
     dlfdm::FDMSolver fdm(aermacchi_s211);
-    dlfdm::AircraftState init_state;        // Initial conditions for integration
 
     hud::FlightData hud_data;
 
-    // -------------------------------------------------------------------------
-    // Trim conditions
-    init_state.inertial_position = glm::vec3(0.0f,0.0f,-5000.0f);     // [m] - Sistema NED: North, East, Down
-    init_state.body_velocity = glm::vec3(149.992f,0.0f,1.521f);     // [m/s]
-    init_state.body_omega = glm::vec3(0.0f,0.0f,0.0f);
-    init_state.theta = 0.0f;
-    init_state.phi = 0.0f;
-    init_state.psi = 0.0f;
+    // Initial conditions for integration: state and controls come together,
+    // see dlfdm::TrimPoint
+    dlfdm::TrimPoint trim = dlfdm::jettrainer::get_trim_condition(
+                dlfdm::jettrainer::TrimCondition::kISA5000TAS150);
 
-    dlfdm::ControlInputs controls;
-    controls.elevator = -0.0937f;  // [rad]
-    controls.aileron = 0.0f;
-    controls.rudder = 0.0f;
-    controls.throttle = 0.20426f;    // [%]
-    // -------------------------------------------------------------------------
+    dlfdm::AircraftState init_state = trim.state;
+    dlfdm::ControlInputs controls = trim.controls;
 
     std::cout << "DLFDM" << std::endl;
     std::cout << "----------------------" << std::endl;

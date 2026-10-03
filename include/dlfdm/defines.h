@@ -14,7 +14,7 @@ struct ControlInputs {
 };
 
 struct AircraftState {
-    glm::vec3 inertial_position;       // [m] - [x=north, y=east, z=down] Position (Inertial frame)
+    glm::vec3 inertial_position;        // [m] - [x=north, y=east, z=down] Position (Inertial frame)
     glm::vec3 body_velocity;            // [m/s] - [x=u, y=v, z=w] Velocity (Body frame)
     glm::vec3 body_omega;               // [rad/s] - [x=p, y=q, z=r] Angular velocity (Body frame)
 
@@ -22,6 +22,15 @@ struct AircraftState {
     float phi;                          // [rad] - Roll angle
     float theta;                        // [rad] - Pitch angle
     float psi;                          // [rad] - Yaw angle psi
+};
+
+///
+/// \brief A trim point: state **and** controls. Both together, because apart
+/// they mean nothing - changing one without the other breaks the equilibrium.
+///
+struct TrimPoint {
+    AircraftState  state;
+    ControlInputs  controls;
 };
 
 struct AircraftParameters {
