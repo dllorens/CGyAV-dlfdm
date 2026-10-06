@@ -7,9 +7,14 @@ static std::ostream& operator<<(std::ostream& os, const glm::vec3 v){
     return os;
 }
 
+// The submodels keep a reference to the aircraft parameters, so they are
+// initialized from aircraft_data_ --- this solver's own copy --- and never from
+// p, which may be a temporary that dies with this constructor. aircraft_data_ is
+// declared before them in fdmsolver.h, so it is built first and destroyed last.
 FDMSolver::FDMSolver(const AircraftParameters& p, float dt)
-    : aircraft_data_(p), aerodynamics(p,&atmosphere_), propulsion(p,&atmosphere_),
-      dynamics(p), time_step_(dt), time_(0.0f), body_thrust_(0.0f)
+    : aircraft_data_(p), aerodynamics(aircraft_data_,&atmosphere_),
+      propulsion(aircraft_data_,&atmosphere_), dynamics(aircraft_data_),
+      time_step_(dt), time_(0.0f), body_thrust_(0.0f)
 {
     // Initialize state
     aircraft_state_.inertial_position = glm::vec3(0.0f);

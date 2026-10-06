@@ -41,6 +41,9 @@ public:
     void log_moments(std::ostream& os, const char& sep = ',') const;
 
 private:
+    /// Referenced, not copied: the referent is FDMSolver::aircraft_data_, the
+    /// solver's own copy, which outlives this object. Constructing this model
+    /// directly from a temporary leaves this reference dangling.
     const AircraftParameters& aircraft_data_;
     Atmosphere<float>* atmosphere_;
 
